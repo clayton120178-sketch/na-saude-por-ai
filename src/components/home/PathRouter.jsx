@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import Container from '../ui/Container'
 import SectionHeading from '../ui/SectionHeading'
 import Reveal from '../motion/Reveal'
+import { springLively } from '../motion/transitions'
 
 const paths = [
   {
@@ -46,38 +47,49 @@ export default function PathRouter() {
 
         <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-5">
           {paths.map(({ icon: Icon, title, desc, cta, to, highlight }, i) => (
-            <Reveal key={title} delay={i * 0.07}>
-              <Link
-                to={to}
-                className={`group relative flex flex-col gap-4 p-6 rounded-lg border transition-all duration-220 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 ${
-                  highlight
-                    ? 'bg-navy-700 border-navy-700 text-white shadow-lg hover:shadow-xl hover:-translate-y-1'
-                    : 'bg-surface border-line text-ink hover:shadow-md hover:-translate-y-0.5'
-                }`}
-                aria-label={title}
-              >
-                <span
-                  className={`inline-flex items-center justify-center w-10 h-10 rounded-sm ${
-                    highlight ? 'bg-white/15' : 'bg-teal-50'
+            <Reveal key={title} delay={i * 0.08}>
+              <motion.div whileHover={{ y: highlight ? -6 : -4 }} transition={springLively}>
+                <Link
+                  to={to}
+                  className={`group relative flex flex-col gap-4 p-6 rounded-lg border focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 ${
+                    highlight
+                      ? 'bg-navy-700 border-navy-700 text-white shadow-lg hover:shadow-2xl'
+                      : 'bg-surface border-line text-ink shadow-sm hover:shadow-md'
                   }`}
+                  aria-label={title}
                 >
-                  <Icon size={20} className={highlight ? 'text-teal-400' : 'text-teal-500'} strokeWidth={1.75} />
-                </span>
+                  {/* anel de brilho teal no card em destaque */}
+                  {highlight && (
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -inset-px rounded-lg opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                      style={{ boxShadow: '0 0 0 1px rgba(27,197,197,0.5), 0 18px 50px -12px rgba(27,197,197,0.45)' }}
+                    />
+                  )}
 
-                <div className="flex-1">
-                  <h3 className={`font-sans font-semibold text-h3 leading-snug mb-1 ${highlight ? 'text-white' : 'text-navy-700'}`}>
-                    {title}
-                  </h3>
-                  <p className={`font-sans text-small leading-relaxed ${highlight ? 'text-white/70' : 'text-ink-soft'}`}>
-                    {desc}
-                  </p>
-                </div>
+                  <span
+                    className={`relative inline-flex items-center justify-center w-11 h-11 rounded-sm transition-transform duration-300 group-hover:scale-110 ${
+                      highlight ? 'bg-white/15' : 'bg-teal-50'
+                    }`}
+                  >
+                    <Icon size={20} className={highlight ? 'text-teal-400' : 'text-teal-500'} strokeWidth={1.75} />
+                  </span>
 
-                <div className={`flex items-center gap-1.5 font-sans text-small font-semibold transition-transform duration-200 group-hover:translate-x-1 ${highlight ? 'text-teal-400' : 'text-navy-700'}`}>
-                  {cta}
-                  <ArrowRight size={15} />
-                </div>
-              </Link>
+                  <div className="relative flex-1">
+                    <h3 className={`font-sans font-semibold text-h3 leading-snug mb-1 ${highlight ? 'text-white' : 'text-navy-700'}`}>
+                      {title}
+                    </h3>
+                    <p className={`font-sans text-small leading-relaxed ${highlight ? 'text-white/70' : 'text-ink-soft'}`}>
+                      {desc}
+                    </p>
+                  </div>
+
+                  <div className={`relative flex items-center gap-1.5 font-sans text-small font-semibold transition-transform duration-300 group-hover:translate-x-1.5 ${highlight ? 'text-teal-400' : 'text-navy-700'}`}>
+                    {cta}
+                    <ArrowRight size={15} />
+                  </div>
+                </Link>
+              </motion.div>
             </Reveal>
           ))}
         </div>

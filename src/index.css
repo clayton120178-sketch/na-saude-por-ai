@@ -18,6 +18,33 @@
     padding-bottom: clamp(4rem, 9vw, 7rem);
   }
 
+  .atmosphere-orb {
+    position: absolute;
+    border-radius: 9999px;
+    transform: translate(-50%, -50%);
+    will-change: transform;
+  }
+  .orb-a { animation: orb-a 19s ease-in-out infinite; }
+  .orb-b { animation: orb-b 23s ease-in-out infinite; }
+  .orb-c { animation: orb-c 21s ease-in-out infinite; }
+
+  @keyframes orb-a {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50%      { transform: translate(calc(-50% + 36px), calc(-50% - 28px)) scale(1.12); }
+  }
+  @keyframes orb-b {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50%      { transform: translate(calc(-50% - 30px), calc(-50% + 26px)) scale(1.1); }
+  }
+  @keyframes orb-c {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50%      { transform: translate(calc(-50% + 24px), calc(-50% + 20px)) scale(1.14); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .orb-a, .orb-b, .orb-c { animation: none; }
+  }
+
   .duration-220 {
     transition-duration: 220ms;
   }

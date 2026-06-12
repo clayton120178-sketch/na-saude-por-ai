@@ -1,6 +1,10 @@
 import { motion, useReducedMotion } from 'framer-motion'
+import { easeOutExpo } from './transitions'
 
-export default function Stagger({ children, staggerDelay = 0.06, className = '' }) {
+/**
+ * Stagger premium: filhos entram em cascata com blur + y.
+ */
+export default function Stagger({ children, staggerDelay = 0.09, delayChildren = 0, className = '' }) {
   const reduced = useReducedMotion()
 
   const container = {
@@ -8,18 +12,22 @@ export default function Stagger({ children, staggerDelay = 0.06, className = '' 
     show: {
       transition: {
         staggerChildren: reduced ? 0 : staggerDelay,
+        delayChildren: reduced ? 0 : delayChildren,
       },
     },
   }
 
   const item = {
-    hidden: { opacity: 0, y: reduced ? 0 : 16 },
+    hidden: reduced ? { opacity: 0 } : { opacity: 0, y: 26, filter: 'blur(8px)' },
     show: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+      filter: 'blur(0px)',
+      transition: { duration: reduced ? 0.3 : 0.75, ease: easeOutExpo },
     },
   }
+
+  const arr = Array.isArray(children) ? children : [children]
 
   return (
     <motion.div
@@ -29,13 +37,11 @@ export default function Stagger({ children, staggerDelay = 0.06, className = '' 
       whileInView="show"
       viewport={{ once: true, amount: 0.15 }}
     >
-      {Array.isArray(children)
-        ? children.map((child, i) => (
-            <motion.div key={i} variants={item}>
-              {child}
-            </motion.div>
-          ))
-        : <motion.div variants={item}>{children}</motion.div>}
+      {arr.map((child, i) => (
+        <motion.div key={i} variants={item}>
+          {child}
+        </motion.div>
+      ))}
     </motion.div>
   )
 }

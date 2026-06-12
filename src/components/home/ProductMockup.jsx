@@ -4,8 +4,8 @@
  * Anima: seleção de alternativa → gabarito comentado, chips de tema, gráfico de desempenho.
  */
 import { useState, useEffect, useRef } from 'react'
-import { motion, useInView, useReducedMotion } from 'framer-motion'
-import { CheckCircle2, XCircle, ChevronDown } from 'lucide-react'
+import { motion, useInView, useReducedMotion, animate } from 'framer-motion'
+import { CheckCircle2, XCircle } from 'lucide-react'
 
 const alternativas = ['A', 'B', 'C', 'D', 'E']
 const CORRETA = 'C'
@@ -20,6 +20,43 @@ const barras = [
   { tema: 'Ética', pct: 45, cor: '#DC2626' },
   { tema: 'Anatomia', pct: 71, cor: '#16A34A' },
 ]
+
+/* Barra de desempenho: cresce com spring e a porcentagem conta junto */
+function PerfBar({ tema, pct, cor, inView, index, reduced }) {
+  const [shown, setShown] = useState(reduced ? pct : 0)
+
+  useEffect(() => {
+    if (reduced || !inView) {
+      setShown(pct)
+      return
+    }
+    const controls = animate(0, pct, {
+      duration: 1,
+      delay: index * 0.12,
+      ease: [0.16, 1, 0.3, 1],
+      onUpdate: (v) => setShown(Math.round(v)),
+    })
+    return () => controls.stop()
+  }, [inView, reduced, pct, index])
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1">
+        <span className="font-sans text-small text-ink">{tema}</span>
+        <span className="font-mono text-small font-medium tabular-nums" style={{ color: cor }}>{shown}%</span>
+      </div>
+      <div className="h-2 rounded-full bg-sand-100 overflow-hidden">
+        <motion.div
+          className="h-full rounded-full"
+          style={{ backgroundColor: cor }}
+          initial={{ width: 0 }}
+          animate={{ width: inView ? `${pct}%` : 0 }}
+          transition={{ type: 'spring', stiffness: 60, damping: 18, delay: reduced ? 0 : index * 0.12 }}
+        />
+      </div>
+    </div>
+  )
+}
 
 export default function ProductMockup() {
   const reduced = useReducedMotion()
@@ -152,21 +189,7 @@ export default function ProductMockup() {
         <p className="font-sans text-eyebrow font-semibold uppercase tracking-wider text-ink-soft mb-3">Desempenho por tema</p>
         <div className="flex flex-col gap-2.5">
           {barras.map(({ tema, pct, cor }, i) => (
-            <div key={tema}>
-              <div className="flex items-center justify-between mb-1">
-                <span className="font-sans text-small text-ink">{tema}</span>
-                <span className="font-mono text-small font-medium" style={{ color: cor }}>{pct}%</span>
-              </div>
-              <div className="h-2 rounded-full bg-sand-100 overflow-hidden">
-                <motion.div
-                  className="h-full rounded-full"
-                  style={{ backgroundColor: cor }}
-                  initial={{ width: 0 }}
-                  animate={{ width: inView ? `${pct}%` : 0 }}
-                  transition={{ duration: 0.7, delay: reduced ? 0 : i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-                />
-              </div>
-            </div>
+            <PerfBar key={tema} tema={tema} pct={pct} cor={cor} inView={inView} index={i} reduced={reduced} />
           ))}
         </div>
       </div>

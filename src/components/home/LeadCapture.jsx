@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Bell, CheckCircle2 } from 'lucide-react'
 import Container from '../ui/Container'
+import Atmosphere from '../ui/Atmosphere'
 import Reveal from '../motion/Reveal'
 
 export default function LeadCapture() {
@@ -15,8 +16,9 @@ export default function LeadCapture() {
   }
 
   return (
-    <section className="py-section bg-navy-700" aria-labelledby="lead-capture-heading">
-      <Container>
+    <section className="relative overflow-hidden py-section bg-navy-700" aria-labelledby="lead-capture-heading">
+      <Atmosphere variant="dark" />
+      <Container className="relative z-[2]">
         <Reveal>
           <div className="max-w-xl mx-auto text-center">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/10 mb-5">

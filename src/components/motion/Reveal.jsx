@@ -1,22 +1,23 @@
-import { motion } from 'framer-motion'
-import { useReducedMotion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
+import { easeOutExpo } from './transitions'
 
-export default function Reveal({ children, delay = 0, className = '' }) {
+/**
+ * Reveal premium: entra com opacity + translateY + desfoque que assenta.
+ * O blur é o que dá a sensação de "foco entrando" — distingue de um fade comum.
+ */
+export default function Reveal({ children, delay = 0, y = 28, className = '', as = 'div' }) {
   const reduced = useReducedMotion()
+  const MotionTag = motion[as] || motion.div
 
   return (
-    <motion.div
+    <MotionTag
       className={className}
-      initial={{ opacity: 0, y: reduced ? 0 : 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.15 }}
-      transition={{
-        duration: reduced ? 0.01 : 0.55,
-        delay,
-        ease: [0.22, 1, 0.36, 1],
-      }}
+      initial={reduced ? { opacity: 0 } : { opacity: 0, y, filter: 'blur(10px)' }}
+      whileInView={reduced ? { opacity: 1 } : { opacity: 1, y: 0, filter: 'blur(0px)' }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: reduced ? 0.3 : 0.85, delay, ease: easeOutExpo }}
     >
       {children}
-    </motion.div>
+    </MotionTag>
   )
 }

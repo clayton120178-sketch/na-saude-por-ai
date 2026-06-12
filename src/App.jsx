@@ -1,18 +1,20 @@
 import { Routes, Route, useLocation } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import Layout from './components/layout/Layout'
 import HomePage from './pages/HomePage'
 import SimuladoPage from './pages/SimuladoPage'
 import EditaisPage from './pages/EditaisPage'
 import SobrePage from './pages/SobrePage'
+import { easeOutExpo } from './components/motion/transitions'
 
 function PageWrapper({ children }) {
+  const reduced = useReducedMotion()
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.18 }}
+      initial={reduced ? { opacity: 0 } : { opacity: 0, y: 14, filter: 'blur(8px)' }}
+      animate={reduced ? { opacity: 1 } : { opacity: 1, y: 0, filter: 'blur(0px)' }}
+      exit={reduced ? { opacity: 0 } : { opacity: 0, y: -8, filter: 'blur(6px)' }}
+      transition={{ duration: 0.45, ease: easeOutExpo }}
     >
       {children}
     </motion.div>
