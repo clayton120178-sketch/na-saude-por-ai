@@ -1,163 +1,238 @@
-import { useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
-import { ArrowRight, Stethoscope, BadgeCheck } from 'lucide-react'
+import { motion, useReducedMotion } from 'framer-motion'
+import { ArrowRight, Check, Star, CheckCircle2, TrendingUp } from 'lucide-react'
 import Button from '../ui/Button'
 import Container from '../ui/Container'
 import Atmosphere from '../ui/Atmosphere'
+import Mark from '../ui/Mark'
 import Signature from './Signature'
-import { easeOutExpo } from '../motion/transitions'
+import { springLively } from '../motion/transitions'
 
-/* Linhas do H1 reveladas por máscara (cada uma sobe de baixo) */
-const linhasH1 = ['Facilitando a sua', 'jornada na enfermagem.']
+const EASE = [0.16, 1, 0.3, 1]
 
-function MaskLine({ children, delay }) {
-  const reduced = useReducedMotion()
-  if (reduced) {
-    return <span className="block">{children}</span>
-  }
-  return (
-    <span className="block overflow-hidden pb-[0.08em]">
-      <motion.span
-        className="block"
-        initial={{ y: '115%' }}
-        animate={{ y: '0%' }}
-        transition={{ delay, duration: 0.95, ease: easeOutExpo }}
-      >
-        {children}
-      </motion.span>
-    </span>
-  )
-}
-
-function fade(delay, reduced, y = 18) {
+/* entrada confiante: sobe rápido com leve overshoot */
+function up(delay, reduced, y = 22) {
   return {
-    initial: { opacity: 0, y: reduced ? 0 : y, filter: reduced ? 'none' : 'blur(6px)' },
-    animate: { opacity: 1, y: 0, filter: 'blur(0px)' },
-    transition: { duration: 0.7, delay, ease: easeOutExpo },
+    initial: { opacity: 0, y: reduced ? 0 : y },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: reduced ? 0.3 : 0.55, delay, ease: EASE },
   }
 }
+
+const avatares = [
+  { ini: 'F', bg: '#2D2A55' },
+  { ini: 'C', bg: '#15A8A8' },
+  { ini: 'J', bg: '#4A4778' },
+  { ini: 'P', bg: '#1BC5C5' },
+]
 
 export default function Hero() {
   const reduced = useReducedMotion()
-  const ref = useRef(null)
-
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start start', 'end start'],
-  })
-  const photoY = useTransform(scrollYProgress, [0, 1], [0, reduced ? 0 : 90])
-  const photoScale = useTransform(scrollYProgress, [0, 1], [1, reduced ? 1 : 1.06])
-  const textY = useTransform(scrollYProgress, [0, 1], [0, reduced ? 0 : -40])
 
   return (
-    <section
-      ref={ref}
-      className="relative overflow-hidden bg-bg pt-12 pb-20 md:pt-20 md:pb-28"
-      aria-label="Apresentação"
-    >
+    <section className="relative overflow-hidden bg-bg pt-10 pb-16 md:pt-16 md:pb-24" aria-label="Apresentação">
       <Atmosphere variant="hero" />
 
       <Container className="relative z-[2]">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center">
-          {/* Texto */}
-          <motion.div style={{ y: textY }}>
-            <motion.div {...fade(0, reduced)} className="flex items-center gap-2.5 mb-5">
-              <span className="h-px w-8 bg-teal-500/60" />
-              <span className="font-sans text-eyebrow font-semibold uppercase tracking-[0.18em] text-navy-500">
-                Concursos · Enfermagem
+        <div className="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-10 lg:gap-12 items-center">
+          {/* ---------- Texto ---------- */}
+          <div>
+            {/* Pill com pulso */}
+            <motion.div {...up(0, reduced)} className="inline-flex items-center gap-2 rounded-full bg-teal-50 border border-teal-500/25 pl-2.5 pr-3.5 py-1.5 mb-6">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-teal-500 opacity-75 animate-ping" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-teal-500" />
+              </span>
+              <span className="font-sans text-eyebrow font-bold uppercase tracking-[0.1em] text-teal-600">
+                Concursos de Enfermagem
               </span>
             </motion.div>
 
-            <h1
-              className="font-display font-semibold text-navy-900 leading-[1.04] tracking-[-0.01em] mb-3"
+            {/* Headline */}
+            <motion.h1
+              {...up(0.08, reduced)}
+              className="font-display font-semibold text-navy-900 leading-[1.05] tracking-[-0.015em]"
               style={{ fontSize: 'var(--fs-display)' }}
             >
-              {linhasH1.map((linha, i) => (
-                <MaskLine key={linha} delay={0.15 + i * 0.12}>
-                  {linha}
-                </MaskLine>
-              ))}
-            </h1>
+              Treine com{' '}
+              <Mark delay={0.7}>questões reais</Mark>{' '}
+              e chegue na prova sabendo o que cai.
+            </motion.h1>
 
-            <div className="mb-6 -mt-1">
+            <motion.div {...up(0.16, reduced)} className="mt-3 mb-5">
               <Signature delay={1.0} />
-            </div>
+            </motion.div>
 
+            {/* Subhead */}
             <motion.p
-              {...fade(0.55, reduced)}
-              className="font-sans text-ink-soft leading-relaxed mb-8 max-w-md"
+              {...up(0.22, reduced)}
+              className="font-sans text-ink-soft leading-relaxed mb-7 max-w-xl"
               style={{ fontSize: 'var(--fs-lead)' }}
             >
-              Materiais atualizados, simulados com questões reais e a orientação de
-              quem já passou. Eu te acompanho até a aprovação.
+              <strong className="text-navy-700 font-semibold">1.500+ questões</strong> de concursos comentadas, com
+              diagnóstico do que você mais erra. É como ter um professor particular na sua casa, 24 horas por dia.
             </motion.p>
 
-            <motion.div {...fade(0.68, reduced)} className="flex flex-col sm:flex-row gap-3">
-              <Button as={Link} to="/simulados" size="lg">
-                Conhecer os simulados
-                <ArrowRight size={18} />
+            {/* CTAs */}
+            <motion.div {...up(0.3, reduced)} className="flex flex-col sm:flex-row gap-3">
+              <Button as={Link} to="/simulados" variant="cta" size="xl">
+                Quero treinar agora
+                <ArrowRight size={20} />
               </Button>
-              <Button as={Link} to="/editais" variant="secondary" size="lg">
+              <Button as={Link} to="/editais" variant="secondary" size="xl">
                 Ver editais abertos
               </Button>
             </motion.div>
-          </motion.div>
 
-          {/* Foto com parallax */}
-          <motion.div
-            initial={{ opacity: 0, scale: reduced ? 1 : 0.94, filter: reduced ? 'none' : 'blur(12px)' }}
-            animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-            transition={{ duration: 1, delay: reduced ? 0 : 0.3, ease: easeOutExpo }}
-            className="relative flex items-center justify-center"
-          >
-            <div className="relative w-full max-w-sm mx-auto">
-              <motion.div
-                style={{ y: photoY, scale: photoScale }}
-                className="aspect-[4/5] rounded-xl bg-gradient-to-b from-sand-200 to-sand-100 flex flex-col items-center justify-center gap-3 border border-line shadow-lg overflow-hidden"
-                role="img"
-                aria-label="Foto da creator — retrato"
-              >
-                <div className="w-16 h-16 rounded-full bg-surface/70 backdrop-blur-sm flex items-center justify-center border-2 border-line shadow-sm">
-                  <Stethoscope size={28} className="text-navy-500" strokeWidth={1.5} />
-                </div>
-                <p className="font-sans text-small text-ink-soft text-center px-6">
-                  Foto da creator
-                  <br />
-                  <span className="text-eyebrow text-navy-500 uppercase tracking-wider">
-                    Retrato — substituir
+            {/* Reasseguramento */}
+            <motion.ul {...up(0.38, reduced)} className="flex flex-wrap items-center gap-x-5 gap-y-1.5 mt-4">
+              {['Comece grátis', '7 dias de garantia', 'Cancele quando quiser'].map((t) => (
+                <li key={t} className="flex items-center gap-1.5 font-sans text-small text-ink-soft">
+                  <Check size={15} className="text-teal-600" strokeWidth={3} />
+                  {t}
+                </li>
+              ))}
+            </motion.ul>
+
+            {/* Prova social */}
+            <motion.div {...up(0.46, reduced)} className="flex items-center gap-4 mt-8 pt-7 border-t border-line">
+              <div className="flex -space-x-2.5">
+                {avatares.map((a) => (
+                  <span
+                    key={a.ini}
+                    className="inline-flex items-center justify-center w-9 h-9 rounded-full border-2 border-bg font-sans text-small font-bold text-white"
+                    style={{ backgroundColor: a.bg }}
+                  >
+                    {a.ini}
                   </span>
-                </p>
-              </motion.div>
-
-              {/* Credencial flutuante */}
-              <motion.div
-                initial={{ opacity: 0, y: 16, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{
-                  type: 'spring',
-                  stiffness: 200,
-                  damping: 18,
-                  delay: reduced ? 0 : 1.0,
-                }}
-                className="absolute -bottom-5 -left-3 sm:-left-5 bg-surface/90 backdrop-blur-md rounded-lg shadow-lg px-4 py-3 border border-line flex items-center gap-2.5"
-              >
-                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-teal-50 flex-shrink-0">
-                  <BadgeCheck size={16} className="text-teal-500" />
-                </span>
-                <div>
-                  <p className="font-sans text-eyebrow font-semibold text-navy-700 uppercase tracking-wider leading-none">
-                    Aprovada
-                  </p>
-                  <p className="font-sans text-small text-ink-soft mt-0.5">
-                    Concurso Federal de Enfermagem
-                  </p>
+                ))}
+              </div>
+              <div>
+                <div className="flex items-center gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} size={13} className="fill-amber-400 text-amber-400" />
+                  ))}
                 </div>
-              </motion.div>
-            </div>
+                <p className="font-sans text-small text-ink-soft mt-0.5">
+                  <strong className="text-navy-700 font-bold">2.400+ enfermeiras</strong> aprovadas e treinando
+                </p>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* ---------- Showcase do produto ---------- */}
+          <motion.div
+            initial={{ opacity: 0, y: reduced ? 0 : 28, scale: reduced ? 1 : 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: reduced ? 0.3 : 0.7, delay: reduced ? 0 : 0.25, ease: EASE }}
+            className="relative"
+          >
+            {/* blob de cor atrás (estático, intencional) */}
+            <div
+              aria-hidden="true"
+              className="absolute -inset-6 rounded-[32px] -z-[1]"
+              style={{ background: 'radial-gradient(60% 60% at 70% 30%, rgba(27,197,197,0.18), transparent 70%)' }}
+            />
+
+            <AppWindow />
+
+            {/* chip flutuante: aprovada */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.7, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ ...springLively, delay: reduced ? 0 : 0.9 }}
+              className="absolute -top-3 -right-2 sm:-right-4 bg-surface rounded-lg shadow-lg border border-line px-3.5 py-2.5 flex items-center gap-2"
+            >
+              <span className="flex items-center justify-center w-7 h-7 rounded-full bg-green-100 flex-shrink-0">
+                <CheckCircle2 size={16} className="text-green-600" />
+              </span>
+              <div>
+                <p className="font-sans text-eyebrow font-bold text-green-700 uppercase tracking-wide leading-none">Aprovada!</p>
+                <p className="font-sans text-[11px] text-ink-soft mt-0.5 leading-none">Prefeitura de SP</p>
+              </div>
+            </motion.div>
+
+            {/* chip flutuante: evolução */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.7, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ ...springLively, delay: reduced ? 0 : 1.05 }}
+              className="absolute -bottom-3 -left-2 sm:-left-5 bg-navy-700 rounded-lg shadow-lg px-3.5 py-2.5 flex items-center gap-2.5"
+            >
+              <span className="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 flex-shrink-0">
+                <TrendingUp size={16} className="text-teal-400" />
+              </span>
+              <div>
+                <p className="font-mono text-body font-bold text-white leading-none">+23%</p>
+                <p className="font-sans text-[11px] text-white/60 mt-0.5 leading-none">de acerto em 3 semanas</p>
+              </div>
+            </motion.div>
           </motion.div>
         </div>
       </Container>
     </section>
+  )
+}
+
+/* Moldura de app — placeholder DESENHADO (substituir pelo print real do simulado) */
+function AppWindow() {
+  const alts = [
+    { l: 'A', t: 'A velocidade de infusão não influencia.', s: 'idle' },
+    { l: 'B', t: 'A via IM é preferível em < 1 ano.', s: 'wrong' },
+    { l: 'C', t: 'O cálculo considera peso e superfície.', s: 'right' },
+    { l: 'D', t: 'Soluções hipertônicas em veia periférica.', s: 'idle' },
+  ]
+  return (
+    <div className="relative rounded-xl bg-surface border border-line shadow-2xl overflow-hidden">
+      {/* chrome da janela */}
+      <div className="flex items-center gap-1.5 px-4 h-9 bg-sand-100 border-b border-line">
+        <span className="w-2.5 h-2.5 rounded-full bg-[#FF5F57]" />
+        <span className="w-2.5 h-2.5 rounded-full bg-[#FEBC2E]" />
+        <span className="w-2.5 h-2.5 rounded-full bg-[#28C840]" />
+        <span className="ml-3 font-sans text-[11px] text-ink-soft bg-surface rounded px-2.5 py-0.5 border border-line">
+          app.nasaudeporai.com.br/simulado
+        </span>
+      </div>
+
+      <div className="p-5">
+        <div className="flex items-center justify-between mb-3">
+          <span className="bg-teal-50 text-teal-600 rounded-sm px-2 py-0.5 font-sans text-[11px] font-semibold">Farmacologia · VUNESP</span>
+          <span className="font-mono text-[11px] text-ink-soft">Questão 47/60</span>
+        </div>
+
+        <p className="font-sans text-small text-ink leading-relaxed mb-4">
+          Sobre a administração de medicamentos por via intravenosa em pacientes pediátricos, é correto afirmar:
+        </p>
+
+        <div className="flex flex-col gap-2 mb-4">
+          {alts.map((a) => {
+            let cls = 'border-line bg-sand-100 text-ink'
+            if (a.s === 'right') cls = 'border-green-500 bg-green-50 text-green-800'
+            if (a.s === 'wrong') cls = 'border-red-300 bg-red-50 text-red-700'
+            return (
+              <div key={a.l} className={`flex items-center gap-2.5 rounded-sm border px-3 py-2 text-small font-sans ${cls}`}>
+                <span className="font-bold w-4">{a.l}</span>
+                <span className="truncate flex-1">{a.t}</span>
+                {a.s === 'right' && <CheckCircle2 size={15} className="text-green-600 flex-shrink-0" />}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* tira de resultado */}
+        <div className="rounded-lg bg-navy-700 px-4 py-3 flex items-center justify-between">
+          <div>
+            <p className="font-sans text-[11px] text-white/60 uppercase tracking-wide font-semibold">Seu acerto em Farmacologia</p>
+            <p className="font-mono text-lead font-bold text-white leading-tight">78%</p>
+          </div>
+          <div className="w-28">
+            <div className="h-2 rounded-full bg-white/15 overflow-hidden">
+              <div className="h-full rounded-full bg-teal-400" style={{ width: '78%' }} />
+            </div>
+            <p className="font-sans text-[11px] text-teal-300 mt-1 text-right font-semibold">acima da média</p>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
